@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartStore AI — Page Connect</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0A0D14;
+    color: #E8EAF2;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: #141720;
+    border-radius: 20px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid #252840;
+  }
+  .logo {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #1877F2, #0D5AC9);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7B839A;
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Buttons */
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: opacity 0.2s;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-facebook { background: #1877F2; color: white; }
+  .btn-facebook:hover:not(:disabled) { background: #1565D8; }
+  .btn-primary { background: #1877F2; color: white; }
+  .btn-outline {
+    background: transparent;
+    color: #7B839A;
+    border: 1px solid #252840;
+    margin-top: 10px;
+  }
+
+  /* Page list */
+  .page-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: #1C2030;
+    border-radius: 14px;
+    border: 1px solid #252840;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .page-item:hover { border-color: #1877F2; }
+  .page-item.selected { border-color: #1877F2; background: #1877F210; }
+  .page-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #1877F220;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1877F2;
+    flex-shrink: 0;
+  }
+  .page-info { flex: 1; }
+  .page-name { font-weight: 600; font-size: 15px; }
+  .page-category { color: #7B839A; font-size: 12px; margin-top: 2px; }
+  .arrow { color: #1877F2; font-size: 18px; }
+
+  /* Loading */
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Success */
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: #00C89620;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+  }
+
+  /* Error */
+  .error-box {
+    background: #FF475720;
+    border: 1px solid #FF475740;
+    border-radius: 12px;
+    padding: 14px;
+    color: #FF4757;
+    font-size: 13px;
+    margin-top: 14px;
+    display: none;
+  }
+
+  .info-box {
+    background: #1877F210;
+    border: 1px solid #1877F230;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 12px;
+    color: #7B839A;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .info-box strong { color: #1877F2; display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">🛍️</div>
+  <h1>SmartStore AI</h1>
+  <p class="subtitle">আপনার Facebook Page connect করুন</p>
+
+  <!-- Screen 1: Login -->
+  <div id="screen-login" class="screen active">
+    <div class="info-box">
+      <strong>কীভাবে কাজ করে?</strong>
+      Facebook দিয়ে login করুন → আপনার Pages দেখুন → একটা select করুন → AI চালু হবে!
+    </div>
+    <button class="btn btn-facebook" id="btn-login" onclick="startFBLogin()">
+      <span>f</span> Facebook দিয়ে Login করুন
+    </button>
+    <div class="error-box" id="login-error"></div>
+  </div>
+
+  <!-- Screen 2: Page Select -->
+  <div id="screen-pages" class="screen">
+    <p style="color:#7B839A;font-size:13px;margin-bottom:14px;">
+      কোন Page-এ AI চালু করতে চান?
+    </p>
+    <div id="pages-list"></div>
+    <div class="error-box" id="pages-error"></div>
+    <button class="btn btn-outline" onclick="logout()">অন্য account দিয়ে login করুন</button>
+  </div>
+
+  <!-- Screen 3: Connecting -->
+  <div id="screen-connecting" class="screen">
+    <div style="text-align:center;padding:20px 0;">
+      <div class="spinner" style="width:40px;height:40px;border-width:3px;margin:0 auto 16px;"></div>
+      <p style="color:#7B839A;">Page connect হচ্ছে...</p>
+    </div>
+  </div>
+
+  <!-- Screen 4: Success -->
+  <div id="screen-success" class="screen">
+    <div style="text-align:center;padding:10px 0;">
+      <div class="success-icon">✅</div>
+      <h2 style="font-size:20px;margin-bottom:8px;">সফলভাবে Connect হয়েছে!</h2>
+      <p style="color:#7B839A;font-size:13px;margin-bottom:24px;">
+        এখন SmartStore AI app-এ ফিরে যান।
+      </p>
+      <button class="btn btn-primary" onclick="openApp()">
+        App-এ ফিরে যান →
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ─── Config ─────────────────────────────────────────────────────────────────
+  const FB_APP_ID = 'YOUR_FACEBOOK_APP_ID'; // আপনার নতুন app-এর ID
+  const APP_DEEP_LINK = 'smartstore://connect'; // Android deep link
+
+  let selectedPage = null;
+  let fbAccessToken = null;
+
+  // ─── FB SDK Init ─────────────────────────────────────────────────────────────
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId: FB_APP_ID,
+      cookie: true,
+      xfbml: true,
+      version: 'v20.0'
+    });
+
+    // Check if already logged in
+    FB.getLoginStatus(function(response) {
+      if (response.status === 'connected') {
+        fbAccessToken = response.authResponse.accessToken;
+        fetchPages();
+      }
+    });
+  };
+
+  // Load FB SDK
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "https://connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  // ─── Login ───────────────────────────────────────────────────────────────────
+  function startFBLogin() {
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Login হচ্ছে...';
+
+    FB.login(function(response) {
+      if (response.authResponse) {
+        fbAccessToken = response.authResponse.accessToken;
+        fetchPages();
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<span>f</span> Facebook দিয়ে Login করুন';
+        showError('login-error', 'Login বাতিল হয়েছে। আবার চেষ্টা করুন।');
+      }
+    }, {
+      scope: 'public_profile,pages_show_list,pages_messaging,pages_manage_metadata'
+    });
+  }
+
+  // ─── Fetch Pages ─────────────────────────────────────────────────────────────
+  function fetchPages() {
+    showScreen('screen-pages');
+    document.getElementById('pages-list').innerHTML =
+      '<div style="text-align:center;padding:20px;color:#7B839A;"><div class="spinner" style="width:30px;height:30px;border-width:2px;margin:0 auto 10px;"></div>Pages load হচ্ছে...</div>';
+
+    FB.api('/me/accounts', {
+      fields: 'id,name,category,access_token,fan_count',
+      access_token: fbAccessToken
+    }, function(response) {
+      if (response.error) {
+        showError('pages-error', 'Pages load হয়নি: ' + response.error.message);
+        document.getElementById('pages-list').innerHTML = '';
+        return;
+      }
+
+      const pages = response.data;
+      if (!pages || pages.length === 0) {
+        document.getElementById('pages-list').innerHTML =
+          '<div style="text-align:center;padding:20px;color:#FFB800;">⚠️ কোনো Page পাওয়া যায়নি। আপনাকে কমপক্ষে একটি Facebook Page-এর Admin হতে হবে।</div>';
+        return;
+      }
+
+      renderPages(pages);
+    });
+  }
+
+  // ─── Render Pages ─────────────────────────────────────────────────────────────
+  function renderPages(pages) {
+    const list = document.getElementById('pages-list');
+    list.innerHTML = '';
+
+    pages.forEach(page => {
+      const div = document.createElement('div');
+      div.className = 'page-item';
+      div.onclick = () => connectPage(page);
+      div.innerHTML = `
+        <div class="page-avatar">${page.name.charAt(0).toUpperCase()}</div>
+        <div class="page-info">
+          <div class="page-name">${page.name}</div>
+          <div class="page-category">${page.category || ''}${page.fan_count ? ' • ' + page.fan_count + ' followers' : ''}</div>
+        </div>
+        <div class="arrow">→</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  // ─── Connect Page ─────────────────────────────────────────────────────────────
+  function connectPage(page) {
+    showScreen('screen-connecting');
+
+    // Backend-এ page data save করুন
+    // আপনার backend URL দিন
+    const backendUrl = 'https://your-backend.com/v1/connect-page-web';
+
+    // Firebase User token নিন
+    fetch(backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pageId: page.id,
+        pageName: page.name,
+        pageAccessToken: page.access_token,
+        category: page.category || '',
+        fbUserToken: fbAccessToken
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        // Deep link দিয়ে App-এ data পাঠাও
+        const deepLink = `${APP_DEEP_LINK}?pageId=${page.id}&pageName=${encodeURIComponent(page.name)}&token=${encodeURIComponent(page.access_token)}`;
+        sessionStorage.setItem('deepLink', deepLink);
+        showScreen('screen-success');
+      } else {
+        showScreen('screen-pages');
+        showError('pages-error', data.message || 'Connection failed');
+      }
+    })
+    .catch(err => {
+      // Backend না থাকলে সরাসরি deep link দিয়ে App-এ পাঠাও
+      const deepLink = `${APP_DEEP_LINK}?pageId=${page.id}&pageName=${encodeURIComponent(page.name)}&token=${encodeURIComponent(page.access_token)}`;
+      sessionStorage.setItem('deepLink', deepLink);
+      showScreen('screen-success');
+    });
+  }
+
+  // ─── Open App ─────────────────────────────────────────────────────────────────
+  function openApp() {
+    const deepLink = sessionStorage.getItem('deepLink');
+    if (deepLink) {
+      window.location.href = deepLink;
+    }
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.style.display = 'block';
+    el.textContent = msg;
+    setTimeout(() => el.style.display = 'none', 5000);
+  }
+
+  function logout() {
+    FB.logout(function() {
+      fbAccessToken = null;
+      showScreen('screen-login');
+      document.getElementById('btn-login').disabled = false;
+      document.getElementById('btn-login').innerHTML = '<span>f</span> Facebook দিয়ে Login করুন';
+    });
+  }
+</script>
+
+</body>
+</html>
